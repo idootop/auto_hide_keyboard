@@ -1,18 +1,16 @@
 # auto_hide_keyboard
 
-An example of automatically retracting the soft keyboard in Flutter by clicking on a blank space. 
+一个在Flutter中点击空白处自动收起软键盘的示例。
 
-[中文文档请戳这里](README.zh.md)
+## 🌍 在线预览
 
-## 🌍 Preview
+打开网页查看效果 👉  [网页链接](https://killer-1255480117.cos.ap-chongqing.myqcloud.com/web/autoHideKeyboard/index.html)
 
-Web demo 👉   [Click Here](https://killer-1255480117.cos.ap-chongqing.myqcloud.com/web/autoHideKeyboard/index.html)
+## 💡 使用方法
 
-## 💡 Usage
+### 场景一：全局监听点击事件自动隐藏键盘
 
-### Case1：Listen to global pointer events to automatically hide the keyboard
-
-Wrap the entire page with `AutoHideKeyBoard.global`
+使用`AutoHideKeyBoard.global`包裹住整个页面
 
 ```dart
 class YourPage extends StatelessWidget {
@@ -27,20 +25,20 @@ class YourPage extends StatelessWidget {
 }
 ```
 
-Disadvantages:
+缺陷：
 
-If you click on the TextField area again while the TextField in focus and keyboard is popped up, 
+如果在输入框聚焦键盘弹起的状态下，再点击输入框区域，
 
-the keyboard will be retracted and then popped up again.
+此时已经弹起的键盘会先收下去，然后重新弹出来。
 
-*For more information, see:*
+*详见:*
 
 * `lib/pages/global_page.dart`
 * `lib/widgets/auto_hide_keyboard.dart#AutoHideKeyBoard.global`
 
-### Case2：Only one TextField on the page
+### 场景二：页面中只有一个输入框
 
-Wrap the TextField with `AutoHideKeyBoard.single`
+使用`AutoHideKeyBoard.single`包裹住输入框
 
 ```dart
 class YourPage extends StatelessWidget {
@@ -62,18 +60,20 @@ class YourPage extends StatelessWidget {
 }
 ```
 
-Disadvantages:
+缺陷：
 
-If there are more than one TextField on the page, click on the TextField area again while the TextField  in focus and keyboard is popped up, the keyboard will be retracted and then popped up again.
+如果页面中有多个输入框，在一个输入框聚焦键盘弹起的状态下，再点击这个输入框所在的区域，
 
-*For more information, see:*
+此时已经弹起的键盘会先收下去，然后重新弹出来。
+
+*详见:*
 
 * `lib/pages/single_page.dart`
 * `lib/widgets/auto_hide_keyboard.dart#AutoHideKeyBoard.single`
 
-### Case3：More than one TextField on the page
+### 场景三：页面中有多个输入框
 
-Wrap the TextField with `AutoHideKeyBoard.multi`
+使用`AutoHideKeyBoard.multi`包裹住输入框
 
 ```dart
 class YourPage extends StatelessWidget {
@@ -100,7 +100,7 @@ class YourPage extends StatelessWidget {
 }
 ```
 
-*For more information, see:*
+*详见:*
 
 * `lib/pages/multi_page.dart`
 * `lib/widgets/auto_hide_keyboard.dart#AutoHideKeyBoard.multi`
