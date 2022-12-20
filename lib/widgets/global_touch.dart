@@ -15,12 +15,12 @@ class _GlobalTouchState extends State<GlobalTouch> {
   @override
   void initState() {
     super.initState();
-    GestureBinding.instance!.pointerRouter.addGlobalRoute(_handlePointerEvent);
+    GestureBinding.instance.pointerRouter.addGlobalRoute(_handlePointerEvent);
   }
 
   @override
   void dispose() {
-    GestureBinding.instance!.pointerRouter
+    GestureBinding.instance.pointerRouter
         .removeGlobalRoute(_handlePointerEvent);
     super.dispose();
   }

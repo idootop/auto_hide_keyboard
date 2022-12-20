@@ -1,91 +1,44 @@
 import 'package:flutter/material.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 
 import 'global_touch.dart';
 
-void hideKeyBoard() => FocusManager.instance.primaryFocus?.unfocus();
-
-enum AutoHideKeyBoardType {
-  ///全局监听点击事件
-  global,
-
-  ///适合一个页面中只有一个输入框的情况
-  single,
-
-  ///适合一个页面中有多个输入框的情况
-  multi,
-}
-
-///点击空白处自动隐藏键盘
 class AutoHideKeyBoard extends StatefulWidget {
-  AutoHideKeyBoard._(
-    this._type, {
+  ///点击空白处自动隐藏键盘
+  ///
+  ///你可以通过设置 padding 调整输入框范围
+  ///
+  ///AutoHideKeyBoard.padding = EdgeInsets.all(48);
+  AutoHideKeyBoard({
     required this.child,
-    this.tag,
     Key? key,
   }) : super(key: key);
 
-  factory AutoHideKeyBoard({
-    required Widget child,
-    String tag = 'default',
-  }) =>
-      AutoHideKeyBoard.multi(
-        tag: tag,
-        child: child,
-      );
-
-  ///包裹住整个页面
-  ///
-  ///此模式有一个缺陷，当点击输入框时会先收起键盘，然后重新唤起焦点
-  ///
-  ///推荐使用[AutoHideKeyBoard.single]或[AutoHideKeyBoard.multi]
-  factory AutoHideKeyBoard.global({required Widget child}) =>
-      AutoHideKeyBoard._(
-        AutoHideKeyBoardType.global,
-        child: child,
-      );
-
-  ///包裹住输入框
-  ///
-  ///适合一个页面中只有一个输入框的情况
-  factory AutoHideKeyBoard.single({required Widget child}) =>
-      AutoHideKeyBoard._(
-        AutoHideKeyBoardType.single,
-        child: child,
-      );
-
-  ///包裹住输入框
-  ///
-  ///适合一个页面中有多个输入框的情况
-  factory AutoHideKeyBoard.multi(
-          {required Widget child, String tag = 'default'}) =>
-      AutoHideKeyBoard._(
-        AutoHideKeyBoardType.multi,
-        tag: tag,
-        child: child,
-      );
-
-  final AutoHideKeyBoardType _type;
   final Widget child;
-  final String? tag;
-  static final Map<String, List<BuildContext>> _multiInputContext = {};
+  static EdgeInsets padding = EdgeInsets.all(48);
 
-  static void setInputContext(String tag, BuildContext context) {
-    if (_multiInputContext[tag] == null) {
-      _multiInputContext[tag] = [];
-    }
-    _multiInputContext[tag]!.add(context);
-  }
+  static final Set<String> _visibleInputs = {};
+  static final Map<String, BuildContext> _inputContexts = {};
 
-  static void removeInputContext(String tag, BuildContext context) {
-    _multiInputContext[tag]!.remove(context);
-    if (_multiInputContext[tag]!.isEmpty) {
-      _multiInputContext.remove(tag);
+  static void _onVisibilityChanged(String id, bool isShow) {
+    if (isShow) {
+      _visibleInputs.add(id);
+    } else {
+      _visibleInputs.remove(id);
     }
   }
 
-  static bool shouldHideKeyboard(
+  static void _addInputContext(String id, BuildContext context) {
+    _inputContexts[id] = context;
+  }
+
+  static void _removeInputContext(String id) {
+    _inputContexts.remove(id);
+  }
+
+  static bool _shouldHideKeyboard(
     BuildContext context,
-    String tag,
+    String id,
     PointerEvent event,
   ) {
     bool tapInside(BuildContext context, PointerEvent event) {
@@ -93,78 +46,65 @@ class AutoHideKeyBoard extends StatefulWidget {
       if (randerObject is RenderBox) {
         final box = randerObject;
         final target = box.localToGlobal(Offset.zero) & box.size;
-        return target.contains(event.position);
+        //扩大输入框区域，防止长按复制粘贴时，点击收起键盘
+        final newTarget = padding.inflateRect(target);
+        return newTarget.contains(event.position);
       }
       return false;
     }
 
-    final _multiInputContexts = _multiInputContext[tag]!;
-    return !_multiInputContexts.any((e) => e != context && tapInside(e, event));
+    // 查询当前页面可见的Input组件
+    final inputContexts =
+        _visibleInputs.map((id) => _inputContexts[id]!).toList();
+    return !inputContexts.any((e) => tapInside(e, event));
   }
 
   @override
   State<AutoHideKeyBoard> createState() => _AutoHideKeyBoardState();
 }
 
+int _id = 0;
+String _getId() => (_id++).toString();
+
 class _AutoHideKeyBoardState extends State<AutoHideKeyBoard> {
+  final String _id = _getId();
+  final Key _key = UniqueKey();
+
+  void _onVisibilityChanged(VisibilityInfo visibilityInfo) {
+    var isShow = visibilityInfo.visibleFraction > 0;
+    AutoHideKeyBoard._onVisibilityChanged(_id, isShow);
+  }
+
   @override
   void initState() {
     super.initState();
-    if (widget._type == AutoHideKeyBoardType.multi) {
-      AutoHideKeyBoard.setInputContext(widget.tag!, context);
-    }
+    AutoHideKeyBoard._addInputContext(_id, context);
   }
 
   @override
   void dispose() {
-    if (widget._type == AutoHideKeyBoardType.multi) {
-      AutoHideKeyBoard.removeInputContext(widget.tag!, context);
-    }
+    AutoHideKeyBoard._removeInputContext(_id);
     super.dispose();
   }
 
   @override
-  void didUpdateWidget(covariant AutoHideKeyBoard oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget._type == AutoHideKeyBoardType.multi) {
-      AutoHideKeyBoard.removeInputContext(oldWidget.tag!, context);
-    }
-    if (widget._type == AutoHideKeyBoardType.multi) {
-      AutoHideKeyBoard.setInputContext(widget.tag!, context);
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    switch (widget._type) {
-      case AutoHideKeyBoardType.global:
-        return GlobalTouch(
-          onPanDown: (_, __) => hideKeyBoard(),
-          child: widget.child,
-        );
-      case AutoHideKeyBoardType.single:
-        return GlobalTouch(
-          onPanDown: (_, inSide) {
-            if (!inSide) hideKeyBoard();
-          },
-          child: widget.child,
-        );
-      case AutoHideKeyBoardType.multi:
-        return GlobalTouch(
-          onPanDown: (event, inSide) {
-            if (!inSide &&
-                AutoHideKeyBoard.shouldHideKeyboard(
-                  context,
-                  widget.tag!,
-                  event,
-                )) {
-              hideKeyBoard();
-            }
-          },
-          child: widget.child,
-        );
-      default:
-        return widget.child;
-    }
+    return GlobalTouch(
+      onPanDown: (event, inSide) {
+        if (!inSide &&
+            AutoHideKeyBoard._shouldHideKeyboard(
+              context,
+              _id,
+              event,
+            )) {
+          FocusManager.instance.primaryFocus?.unfocus();
+        }
+      },
+      child: VisibilityDetector(
+        key: _key,
+        onVisibilityChanged: _onVisibilityChanged,
+        child: widget.child,
+      ),
+    );
   }
 }

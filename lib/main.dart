@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'pages/global_page.dart';
 import 'pages/multi_page.dart';
 import 'pages/single_page.dart';
 
@@ -11,28 +10,53 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'AutoHideKeyboard',
-      home: Home(),
+      home: Page1(),
     );
   }
 }
 
+class Page1 extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Home(() => {
+          Navigator.push<void>(
+            context,
+            MaterialPageRoute<void>(
+              builder: (BuildContext context) => Page2(),
+            ),
+          )
+        });
+  }
+}
+
+class Page2 extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Home(() => {Navigator.pop(context)});
+  }
+}
+
 class Home extends StatelessWidget {
+  Home(this.onClick);
+  final void Function() onClick;
+
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 3,
+      length: 2,
       child: Scaffold(
         appBar: AppBar(
-          title: Text('AutoHideKeyboard'),
+          title: GestureDetector(
+            onTap: onClick,
+            child: Text('AutoHideKeyboard'),
+          ),
           centerTitle: true,
           bottom: TabBar(tabs: [
-            Tab(text: 'global'),
             Tab(text: 'single'),
             Tab(text: 'multi'),
           ]),
         ),
         body: TabBarView(children: [
-          GlobalPage(),
           SinglePage(),
           MultiPage(),
         ]),

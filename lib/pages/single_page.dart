@@ -12,7 +12,7 @@ class SinglePage extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          AutoHideKeyBoard.single(
+          AutoHideKeyBoard(
             child: SimpleTextField(hint: '我是输入框'),
           ),
           SimpleButton(),

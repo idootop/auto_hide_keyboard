@@ -25,7 +25,6 @@ class SimpleTextField extends StatelessWidget {
         borderRadius: BorderRadius.all(Radius.circular(height / 2)),
       ),
       padding: EdgeInsets.symmetric(horizontal: height / 2),
-      margin: EdgeInsets.symmetric(vertical: height / 2),
       child: TextField(
         textAlign: TextAlign.center,
         focusNode: focusNode,

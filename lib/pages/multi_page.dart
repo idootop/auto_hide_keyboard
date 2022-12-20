@@ -12,14 +12,13 @@ class MultiPage extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          AutoHideKeyBoard.multi(
-            tag: 'Page1',
+          AutoHideKeyBoard(
             child: SimpleTextField(
               hint: '我是输入框1',
             ),
           ),
-          AutoHideKeyBoard.multi(
-            tag: 'Page1',
+          Container(height: 24),
+          AutoHideKeyBoard(
             child: SimpleTextField(
               hint: '我是输入框2',
             ),
