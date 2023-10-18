@@ -1,12 +1,12 @@
-# Flutter中点击空白处收起键盘更优雅的解法
+# Flutter 中点击空白处收起键盘更优雅的解法
 
 ## 📖 背景简介
 
-通常我们在Flutter中实现点击空白处隐藏键盘的需求时，有以下两种方法：
+通常我们在 Flutter 中实现点击空白处隐藏键盘的需求时，有以下两种方法：
 
 ### 方案一
 
-在整个页面外部包裹一个GestureDetector
+在整个页面外部包裹一个 GestureDetector
 
 ```dart
 void hideKeyboard() => FocusManager.instance.primaryFocus?.unfocus();
@@ -24,7 +24,7 @@ class SomePage extends StatelessWidget {
 }
 ```
 
-或者全局为所有子页面都包裹一个GestureDetector
+或者全局为所有子页面都包裹一个 GestureDetector
 
 ```dart
 class MyApp extends StatelessWidget {
@@ -44,9 +44,9 @@ class MyApp extends StatelessWidget {
 
 **😫 但是这种方案有一个缺陷：**
 
-如果页面中有其他消费点击事件的子组件（如：Button），那么包裹在当前页面最外面的GestureDetector将无法响应该点击事件。
+如果页面中有其他消费点击事件的子组件（如：Button），那么包裹在当前页面最外面的 GestureDetector 将无法响应该点击事件。
 
-为了解决这个问题，比较简单粗暴的一种做法是，为所有的点击事件再调用一次`hideKeyboard()` >_<
+为了解决这个问题，比较简单粗暴的一种做法是，为所有的点击事件再调用一次`hideKeyboard()` >\_<
 
 （想想就很刺激...）
 
@@ -68,7 +68,7 @@ class SomePage extends StatelessWidget {
                         //点击此按钮的时候，外部GestureDetector的onTap不会响应
                         TextButton(
                             onPressed: onTapButton, //需要再手动调用一次hideKeyboard()
-                            child: Text('我是按钮'), 
+                            child: Text('我是按钮'),
                         ),
                         ... //something
                     ],
@@ -81,7 +81,7 @@ class SomePage extends StatelessWidget {
 
 ### 方案二
 
-针对方案一中的缺陷，我们尝试将包裹在页面外部的GestureDetector换成Listener
+针对方案一中的缺陷，我们尝试将包裹在页面外部的 GestureDetector 换成 Listener
 
 ```dart
 class SomePage extends StatelessWidget {
@@ -99,8 +99,8 @@ class SomePage extends StatelessWidget {
                     children: [
                         //点击此按钮的时候，外部Listener的onPointerDown也会响应
                         TextButton(
-                            onPressed: onTapButton, 
-                            child: Text('我是按钮'), 
+                            onPressed: onTapButton,
+                            child: Text('我是按钮'),
                         ),
                         ... //something
                     ],
@@ -117,7 +117,7 @@ OK，现在方案一中的问题似乎已经完美解决了。
 
 你有没有发现，如果在输入框聚焦键盘弹起的状态下，再点击输入框区域，
 
-此时已经弹起的键盘会先收下去，然后重新弹出来。 
+此时已经弹起的键盘会先收下去，然后重新弹出来。
 
 很蛋疼～
 
@@ -130,11 +130,11 @@ OK，现在方案一中的问题似乎已经完美解决了。
 
 ### 如何监听全局点击事件，且不影响已有组件点击事件的分发响应
 
-对于第一点，我从ToolTip组件的源码中获得了灵感
+对于第一点，我从 ToolTip 组件的源码中获得了灵感
 
 ```dart
 class _TooltipState extends State<Tooltip> withSingleTickerProviderStateMixin {
-    ... 
+    ...
     void _handlePointerEvent(PointerEvent event) {
         ...
         if (event is PointerUpEvent || event is PointerCancelEvent) {
@@ -195,32 +195,31 @@ class _TooltipState extends State<Tooltip> withSingleTickerProviderStateMixin {
   }
 ```
 
-
 ## 🌈 组件封装
 
 根据上面的解决方案，我们把其封装成组件，方便使用。
 
-### GlobalTouch
+### GlobalPointerListener
 
 用途：监听全局手势，不影响父子组件原有点击事件的分发响应流程
 
-|参数|备注|
-|:---:|:---:|
-|onPanDown|inSide表示是否点击在组件内部|
-|onPanUp|inSide表示是否点击在组件内部|
+|   参数    |             备注              |
+| :-------: | :---------------------------: |
+| onPanDown | inSide 表示是否点击在组件内部 |
+|  onPanUp  | inSide 表示是否点击在组件内部 |
 
 ```dart
 ///监听全局手势，不影响父子组件原有点击事件的分发响应流程
-class GlobalTouch extends StatefulWidget {
+class GlobalPointerListener extends StatefulWidget {
   final Widget child;
   final Function(PointerEvent event, bool inSide)? onPanDown;
   final Function(PointerEvent event, bool inSide)? onPanUp;
-  GlobalTouch({required this.child, this.onPanDown, this.onPanUp});
+  GlobalPointerListener({required this.child, this.onPanDown, this.onPanUp});
   @override
-  _GlobalTouchState createState() => _GlobalTouchState();
+  _GlobalPointerListenerState createState() => _GlobalPointerListenerState();
 }
 
-class _GlobalTouchState extends State<GlobalTouch> {
+class _GlobalPointerListenerState extends State<GlobalPointerListener> {
   @override
   void initState() {
     super.initState();
@@ -259,16 +258,16 @@ class _GlobalTouchState extends State<GlobalTouch> {
 
 用途：点击空白处自动隐藏软键盘
 
-|模式|场景|用法|
-|:---:|:---:|:---:|
-|`AutoHideKeyBoard.global`|全局监听点击事件|包裹住整个页面|
-|`AutoHideKeyBoard.single`|适合一个页面中只有一个输入框的情况|包裹住输入框|
-|`AutoHideKeyBoard.multi`|适合一个页面中有多个输入框的情况|包裹住输入框|
+|           模式            |                场景                |      用法      |
+| :-----------------------: | :--------------------------------: | :------------: |
+| `AutoHideKeyboard.global` |          全局监听点击事件          | 包裹住整个页面 |
+| `AutoHideKeyboard.single` | 适合一个页面中只有一个输入框的情况 |  包裹住输入框  |
+| `AutoHideKeyboard.multi`  |  适合一个页面中有多个输入框的情况  |  包裹住输入框  |
 
 ```dart
 void hideKeyBoard() => FocusManager.instance.primaryFocus?.unfocus();
 
-enum AutoHideKeyBoardType {
+enum AutoHideKeyboardType {
   ///全局监听点击事件
   global,
 
@@ -280,19 +279,19 @@ enum AutoHideKeyBoardType {
 }
 
 ///点击空白处自动隐藏键盘
-class AutoHideKeyBoard extends StatefulWidget {
-  AutoHideKeyBoard._(
+class AutoHideKeyboard extends StatefulWidget {
+  AutoHideKeyboard._(
     this._type, {
     required this.child,
     this.tag,
     Key? key,
   }) : super(key: key);
 
-  factory AutoHideKeyBoard({
+  factory AutoHideKeyboard({
     required Widget child,
     String tag = 'default',
   }) =>
-      AutoHideKeyBoard.multi(
+      AutoHideKeyboard.multi(
         tag: tag,
         child: child,
       );
@@ -301,34 +300,34 @@ class AutoHideKeyBoard extends StatefulWidget {
   ///
   ///此模式有一个缺陷，当点击输入框时会先收起键盘，然后重新唤起焦点
   ///
-  ///推荐使用[AutoHideKeyBoard.single]或[AutoHideKeyBoard.multi]
-  factory AutoHideKeyBoard.global({required Widget child}) =>
-      AutoHideKeyBoard._(
-        AutoHideKeyBoardType.global,
+  ///推荐使用[AutoHideKeyboard.single]或[AutoHideKeyboard.multi]
+  factory AutoHideKeyboard.global({required Widget child}) =>
+      AutoHideKeyboard._(
+        AutoHideKeyboardType.global,
         child: child,
       );
 
   ///包裹住输入框
   ///
   ///适合一个页面中只有一个输入框的情况
-  factory AutoHideKeyBoard.single({required Widget child}) =>
-      AutoHideKeyBoard._(
-        AutoHideKeyBoardType.single,
+  factory AutoHideKeyboard.single({required Widget child}) =>
+      AutoHideKeyboard._(
+        AutoHideKeyboardType.single,
         child: child,
       );
 
   ///包裹住输入框
   ///
   ///适合一个页面中有多个输入框的情况
-  factory AutoHideKeyBoard.multi(
+  factory AutoHideKeyboard.multi(
           {required Widget child, String tag = 'default'}) =>
-      AutoHideKeyBoard._(
-        AutoHideKeyBoardType.multi,
+      AutoHideKeyboard._(
+        AutoHideKeyboardType.multi,
         tag: tag,
         child: child,
       );
 
-  final AutoHideKeyBoardType _type;
+  final AutoHideKeyboardType _type;
   final Widget child;
   final String? tag;
   static final Map<String, List<BuildContext>> _multiInputContext = {};
@@ -367,57 +366,57 @@ class AutoHideKeyBoard extends StatefulWidget {
   }
 
   @override
-  State<AutoHideKeyBoard> createState() => _AutoHideKeyBoardState();
+  State<AutoHideKeyboard> createState() => _AutoHideKeyboardState();
 }
 
-class _AutoHideKeyBoardState extends State<AutoHideKeyBoard> {
+class _AutoHideKeyboardState extends State<AutoHideKeyboard> {
   @override
   void initState() {
     super.initState();
-    if (widget._type == AutoHideKeyBoardType.multi) {
-      AutoHideKeyBoard.setInputContext(widget.tag!, context);
+    if (widget._type == AutoHideKeyboardType.multi) {
+      AutoHideKeyboard.setInputContext(widget.tag!, context);
     }
   }
 
   @override
   void dispose() {
-    if (widget._type == AutoHideKeyBoardType.multi) {
-      AutoHideKeyBoard.removeInputContext(widget.tag!, context);
+    if (widget._type == AutoHideKeyboardType.multi) {
+      AutoHideKeyboard.removeInputContext(widget.tag!, context);
     }
     super.dispose();
   }
 
   @override
-  void didUpdateWidget(covariant AutoHideKeyBoard oldWidget) {
+  void didUpdateWidget(covariant AutoHideKeyboard oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget._type == AutoHideKeyBoardType.multi) {
-      AutoHideKeyBoard.removeInputContext(oldWidget.tag!, context);
+    if (oldWidget._type == AutoHideKeyboardType.multi) {
+      AutoHideKeyboard.removeInputContext(oldWidget.tag!, context);
     }
-    if (widget._type == AutoHideKeyBoardType.multi) {
-      AutoHideKeyBoard.setInputContext(widget.tag!, context);
+    if (widget._type == AutoHideKeyboardType.multi) {
+      AutoHideKeyboard.setInputContext(widget.tag!, context);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     switch (widget._type) {
-      case AutoHideKeyBoardType.global:
-        return GlobalTouch(
+      case AutoHideKeyboardType.global:
+        return GlobalPointerListener(
           onPanDown: (_, __) => hideKeyBoard(),
           child: widget.child,
         );
-      case AutoHideKeyBoardType.single:
-        return GlobalTouch(
+      case AutoHideKeyboardType.single:
+        return GlobalPointerListener(
           onPanDown: (_, inSide) {
             if (!inSide) hideKeyBoard();
           },
           child: widget.child,
         );
-      case AutoHideKeyBoardType.multi:
-        return GlobalTouch(
+      case AutoHideKeyboardType.multi:
+        return GlobalPointerListener(
           onPanDown: (event, inSide) {
             if (!inSide &&
-                AutoHideKeyBoard.shouldHideKeyboard(
+                AutoHideKeyboard.shouldHideKeyboard(
                   context,
                   widget.tag!,
                   event,
@@ -440,4 +439,4 @@ class _AutoHideKeyBoardState extends State<AutoHideKeyBoard> {
 
 ## 🌍 在线预览
 
-打开网页查看效果 👉  [网页链接](https://killer-1255480117.cos.ap-chongqing.myqcloud.com/web/autoHideKeyboard/index.html)
+打开网页查看效果 👉 [网页链接](https://killer-1255480117.cos.ap-chongqing.myqcloud.com/web/AutoHideKeyboard/index.html)

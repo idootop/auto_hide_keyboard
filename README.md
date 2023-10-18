@@ -1,29 +1,17 @@
 # auto_hide_keyboard
 
-An example of automatically retracting the soft keyboard in Flutter by clicking on a blank space. 
+Automatically hides the keyboard when tapping outside the TextField.
 
+Simply wrap your `TextField` with the `AutoHideKeyboard`.
 
-## 💡 Usage
-
-```yaml
-dependencies:
-  # ...
-  auto_hide_keyboard:
-    git:
-      url: https://github.com/idootop/auto_hide_keyboard.git
-```
+Example usage:
 
 ```dart
-import 'auto_hide_keyboard/auto_hide_keyboard.dart';
-
-class YourPage extends StatelessWidget {
-  const YourPage({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return AutoHideKeyBoard(
-      child: ..., // Your TextField Widget
-    );
-  }
-}
+AutoHideKeyboard(
+  child: TextField(), // Your TextField widget
+)
 ```
+
+That's it! 
+
+Inspired by `Tooltip`.
