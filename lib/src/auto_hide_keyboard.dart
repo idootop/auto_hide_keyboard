@@ -8,18 +8,18 @@ typedef _Input = (BuildContext, EdgeInsets?);
 class AutoHideKeyboard extends StatefulWidget {
   /// Automatically hides the keyboard when tapping outside the TextField.
   ///
-  /// Simply wrap your `TextField` with the `AutoHideKeyboard`.
-  ///
   /// Example usage:
+  /// 
+  /// Simply wrap your `TextField` with the `AutoHideKeyboard`.
   ///
   /// ```dart
   /// AutoHideKeyboard(
   ///   child: TextField(), // Your TextField widget
   /// )
   /// ```
-  /// 
-  /// That's it! 
-  /// 
+  ///
+  /// That's it!
+  ///
   /// Inspired by [Tooltip].
   AutoHideKeyboard({
     super.key,
@@ -29,7 +29,7 @@ class AutoHideKeyboard extends StatefulWidget {
 
   final Widget child;
   final EdgeInsets? safePadding;
-  static EdgeInsets defaultSafePadding = const EdgeInsets.all(48);
+  static EdgeInsets defaultSafePadding = const EdgeInsets.only(top: 48);
 
   static int _id = 0;
   static String _getId() => (_id++).toString();

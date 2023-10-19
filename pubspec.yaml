@@ -1,5 +1,6 @@
 name: auto_hide_keyboard
 description: Automatically hides the keyboard when tapping outside the TextField.
+homepage: https://github.com/idootop/auto_hide_keyboard
 
 version: 1.0.0
 
@@ -9,6 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+
   visibility_detector: ^0.4.0+2
 
 dev_dependencies:
