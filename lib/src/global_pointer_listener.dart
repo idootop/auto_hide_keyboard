@@ -6,12 +6,12 @@ class GlobalPointerListener extends StatefulWidget {
   ///
   /// Inspired by [Tooltip].
   GlobalPointerListener({
-    super.key,
     required this.child,
     this.onPanDown,
     this.onPanUp,
     this.safePadding,
-  });
+    Key? key,
+  }) : super(key: key);
 
   final Widget child;
   final EdgeInsets? safePadding;
@@ -37,9 +37,9 @@ class _GlobalPointerListenerState extends State<GlobalPointerListener> {
   }
 
   void _handlePointerEvent(PointerEvent event) {
-    final randerObject = context.findRenderObject();
-    if (randerObject is RenderBox) {
-      final box = randerObject;
+    final renderObject = context.findRenderObject();
+    if (renderObject is RenderBox) {
+      final box = renderObject;
       final target = box.localToGlobal(Offset.zero) & box.size;
       final safePadding = widget.safePadding ?? EdgeInsets.zero;
       final safeTarget = safePadding.inflateRect(target);

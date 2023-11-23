@@ -3,13 +3,17 @@ import 'package:visibility_detector/visibility_detector.dart';
 
 import 'global_pointer_listener.dart';
 
-typedef _Input = (BuildContext, EdgeInsets?);
+class InputContext {
+  InputContext(this.context, this.safePadding);
+  BuildContext context;
+  EdgeInsets? safePadding;
+}
 
 class AutoHideKeyboard extends StatefulWidget {
   /// Automatically hides the keyboard when tapping outside the TextField.
   ///
   /// Example usage:
-  /// 
+  ///
   /// Simply wrap your `TextField` with the `AutoHideKeyboard`.
   ///
   /// ```dart
@@ -22,10 +26,10 @@ class AutoHideKeyboard extends StatefulWidget {
   ///
   /// Inspired by [Tooltip].
   AutoHideKeyboard({
-    super.key,
     required this.child,
     this.safePadding,
-  });
+    Key? key,
+  }) : super(key: key);
 
   final Widget child;
   final EdgeInsets? safePadding;
@@ -34,9 +38,9 @@ class AutoHideKeyboard extends StatefulWidget {
   static int _id = 0;
   static String _getId() => (_id++).toString();
   static final Set<String> _visibleInputs = {};
-  static final Map<String, _Input> _inputs = {};
+  static final Map<String, InputContext> _inputs = {};
 
-  static void _addInput(String id, _Input input) {
+  static void _addInput(String id, InputContext input) {
     _inputs[id] = input;
   }
 
@@ -57,13 +61,13 @@ class AutoHideKeyboard extends StatefulWidget {
     String id,
     PointerEvent event,
   ) {
-    bool isTapInside(_Input input, PointerEvent event) {
-      var (context, safePadding) = input;
-      safePadding ??= AutoHideKeyboard.defaultSafePadding;
-      final randerObject = context.findRenderObject();
-      if (randerObject is RenderBox) {
-        final box = randerObject;
-        final target = randerObject.localToGlobal(Offset.zero) & box.size;
+    bool isTapInside(InputContext input, PointerEvent event) {
+      final safePadding =
+          input.safePadding ?? AutoHideKeyboard.defaultSafePadding;
+      final renderObject = input.context.findRenderObject();
+      if (renderObject is RenderBox) {
+        final box = renderObject;
+        final target = renderObject.localToGlobal(Offset.zero) & box.size;
         final safeTarget = safePadding.inflateRect(target);
         return safeTarget.contains(event.position);
       }
@@ -85,7 +89,7 @@ class _AutoHideKeyboardState extends State<AutoHideKeyboard> {
   @override
   void initState() {
     super.initState();
-    AutoHideKeyboard._addInput(_id, (context, widget.safePadding));
+    AutoHideKeyboard._addInput(_id, InputContext(context, widget.safePadding));
   }
 
   @override

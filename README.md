@@ -1,5 +1,7 @@
 # auto_hide_keyboard
 
+[![pub package](https://img.shields.io/pub/v/auto_hide_keyboard.svg)](https://pub.dev/packages/auto_hide_keyboard)
+
 Automatically hides the keyboard when tapping outside the TextField.
 
 ## 🔥 Preview
