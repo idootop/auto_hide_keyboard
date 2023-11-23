@@ -5,8 +5,8 @@ homepage: https://github.com/idootop/auto_hide_keyboard
 version: 1.0.1
 
 environment:
-  sdk: ^2.12.0
-  flutter: ^3.0.0
+  sdk: '>=2.12.0 <4.0.0'
+  flutter: '>=3.0.0'
 
 dependencies:
   flutter:
