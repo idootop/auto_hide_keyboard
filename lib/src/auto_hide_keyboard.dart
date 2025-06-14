@@ -7,6 +7,7 @@ class InputContext {
   InputContext(this.context, this.safePadding);
   BuildContext context;
   EdgeInsets? safePadding;
+  bool isVisible = false;
 }
 
 class AutoHideKeyboard extends StatefulWidget {
@@ -37,7 +38,6 @@ class AutoHideKeyboard extends StatefulWidget {
 
   static int _id = 0;
   static String _getId() => (_id++).toString();
-  static final Set<String> _visibleInputs = {};
   static final Map<String, InputContext> _inputs = {};
 
   static void _addInput(String id, InputContext input) {
@@ -50,9 +50,9 @@ class AutoHideKeyboard extends StatefulWidget {
 
   static void _onVisibilityChanged(String id, bool visible) {
     if (visible) {
-      _visibleInputs.add(id);
+      _inputs[id]?.isVisible = true;
     } else {
-      _visibleInputs.remove(id);
+      _inputs[id]?.isVisible = false;
     }
   }
 
@@ -74,7 +74,7 @@ class AutoHideKeyboard extends StatefulWidget {
       return false;
     }
 
-    final inputs = _visibleInputs.map((id) => _inputs[id]!).toList();
+    final inputs = _inputs.values.where((e) => e.isVisible).toList();
     return !inputs.any((e) => isTapInside(e, event));
   }
 
