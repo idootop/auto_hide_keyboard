@@ -1,3 +1,7 @@
+## 1.1.1
+
+- Docs: Enhanced package description for better clarity
+
 ## 1.1.0
 
 - Fix: Unable to locate visible input field source

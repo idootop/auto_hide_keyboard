@@ -1,8 +1,8 @@
 name: auto_hide_keyboard
-description: Automatically hides the keyboard when tapping outside the TextField.
+description: A Flutter package that automatically hides the soft keyboard when the user taps outside of text input fields or scrolls the page.
 homepage: https://github.com/idootop/auto_hide_keyboard
 
-version: 1.1.0
+version: 1.1.1
 
 environment:
   sdk: '>=2.12.0 <4.0.0'
